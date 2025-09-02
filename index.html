@@ -109,7 +109,42 @@
 
     <!-- Results -->
     <section class="card" id="resultsPanel">
-        <h2 class="text-xl font-semibold mb-5 border-b pb-3">シフト詳細（ライブ計算）</h2>
+        <h2 class="text-xl font-semibold mb-5 border-b pb-3">ライブ計算 詳細</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="result-box">
+                <div class="text-sm text-slate-500">週あたり労働時間</div>
+                <div id="res-weekHours" class="text-2xl font-bold mono text-indigo-600">0.00 h</div>
+            </div>
+            <div class="result-box">
+                <div class="text-sm text-slate-500">週給（概算）</div>
+                <div id="res-weeklyPay" class="text-2xl font-bold mono text-indigo-600">¥0</div>
+            </div>
+            <div class="result-box">
+                <div class="text-sm text-slate-500">月給（概算）</div>
+                <div id="res-monthlyPay" class="text-2xl font-bold mono text-indigo-600">¥0</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-center">
+            <div class="bg-slate-50 rounded-lg p-2">
+                <div class="text-xs text-slate-500">通常時間</div>
+                <div id="res-regularHours" class="font-semibold mono">0.00 h</div>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-2">
+                <div class="text-xs text-slate-500">夜間時間 (18時以降)</div>
+                <div id="res-eveningHours" class="font-semibold mono">0.00 h</div>
+            </div>
+             <div class="bg-slate-50 rounded-lg p-2">
+                <div class="text-xs text-slate-500">法定時間外</div>
+                <div id="res-overtimeHours" class="font-semibold mono text-red-600">0.00 h</div>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-2">
+                <div class="text-xs text-slate-500">残業代 (概算)</div>
+                <div id="res-overtimePay" class="font-semibold mono text-red-600">¥0</div>
+            </div>
+        </div>
+
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
@@ -192,6 +227,7 @@
     }
 
     function calculateMetricsFor(config) {
+        if (!config) return null;
         const dailyMetrics = config.schedule.map(key => calculateMinutes(SHIFTS[key].shifts));
         const dailyTotalMinutes = dailyMetrics.map(m => m.totalMin);
 
@@ -225,12 +261,15 @@
 
         return {
             weekHours: totalWorkMin / 60,
+            regularHours: totalRegularMin / 60,
+            eveningHours: totalEveningMin / 60,
             overtimeHours: totalOvertimeMin / 60,
             weeklyPay,
             monthlyPay,
+            overtimePay: overtimePayVal,
             dailyMinutes: dailyTotalMinutes,
             hourly: config.hourly,
-            eveningHourly: config.eveningHourly
+            eveningHourly: config.eveningHourly,
         };
     }
     
@@ -241,7 +280,7 @@
       state.live.schedule = DAYS.map((_, i) => document.getElementById(`day-${i}`).value);
 
       const liveMetrics = calculateMetricsFor(state.live);
-      const slotMetrics = state.slots.map(slot => slot ? calculateMetricsFor(slot) : null);
+      const slotMetrics = state.slots.map(slot => calculateMetricsFor(slot));
       
       // Render comparison table
       const compBody = document.getElementById('comparison-table-body');
@@ -261,13 +300,22 @@
         </tr>
       `).join('');
 
-      // Render live schedule details
+      // Render live calculation details
+      document.getElementById("res-weekHours").textContent = hoursFmt(liveMetrics.weekHours);
+      document.getElementById("res-weeklyPay").textContent = yen(liveMetrics.weeklyPay);
+      document.getElementById("res-monthlyPay").textContent = yen(liveMetrics.monthlyPay);
+      document.getElementById("res-regularHours").textContent = hoursFmt(liveMetrics.regularHours);
+      document.getElementById("res-eveningHours").textContent = hoursFmt(liveMetrics.eveningHours);
+      document.getElementById("res-overtimeHours").textContent = hoursFmt(liveMetrics.overtimeHours);
+      document.getElementById("res-overtimePay").textContent = yen(liveMetrics.overtimePay);
+      
+      // Render live schedule details table
       const scheduleDetails = document.getElementById("schedule-details");
       scheduleDetails.innerHTML = "";
       DAYS.forEach((day, i) => {
         const shiftKey = state.live.schedule[i];
         const dailyStr = SHIFTS[shiftKey].name;
-        tr = document.createElement('tr');
+        const tr = document.createElement('tr');
         tr.className = "border-b last:border-0";
         tr.innerHTML = `
           <td class="py-2.5 pr-3 font-medium">${day}</td>
