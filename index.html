@@ -20,7 +20,7 @@
   </style>
 </head>
 <body class="text-slate-800">
-  <main class="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+  <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
     <header class="text-center mb-8">
       <h1 class="text-3xl lg:text-4xl font-bold text-slate-900">給与＆シフト・シミュレーター</h1>
       <p class="text-slate-600 mt-2">勤務体系を自由に組み合わせて、給与の変化をリアルタイムで比較・確認できます。</p>
@@ -135,14 +135,22 @@
         </div>
         <div class="border-t pt-5 mt-5">
             <h3 class="text-sm font-medium text-slate-600 mb-3 text-center">現在のライブ計算を比較用に保存</h3>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button id="save-to-slot-1" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg text-base font-semibold text-white transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button id="save-to-slot-1" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-base font-semibold text-white transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"></path></svg>
-                    スロット 1 に保存
+                    スロット 1
                 </button>
-                <button id="save-to-slot-2" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg text-base font-semibold text-white transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700">
+                <button id="save-to-slot-2" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-base font-semibold text-white transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"></path></svg>
-                    スロット 2 に保存
+                    スロット 2
+                </button>
+                 <button id="save-to-slot-3" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-base font-semibold text-white transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"></path></svg>
+                    スロット 3
+                </button>
+                 <button id="save-to-slot-4" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-base font-semibold text-white transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"></path></svg>
+                    スロット 4
                 </button>
             </div>
         </div>
@@ -217,8 +225,10 @@
                     <tr class="border-b-2">
                         <th class="py-2 px-2 text-left font-semibold">比較項目</th>
                         <th class="py-2 px-2 font-semibold bg-indigo-50 rounded-t-lg">ライブ計算</th>
-                        <th class="py-2 px-2 font-semibold">比較スロット 1</th>
-                        <th class="py-2 px-2 font-semibold">比較スロット 2</th>
+                        <th class="py-2 px-2 font-semibold">スロット 1</th>
+                        <th class="py-2 px-2 font-semibold">スロット 2</th>
+                        <th class="py-2 px-2 font-semibold">スロット 3</th>
+                        <th class="py-2 px-2 font-semibold">スロット 4</th>
                     </tr>
                 </thead>
                 <tbody id="comparison-table-body">
@@ -260,7 +270,7 @@
         eveningHourly: 2000,
         schedule: [...PATTERN_A],
       },
-      slots: [null, null],
+      slots: [null, null, null, null],
       weeksPerMonth: 4.33,
     };
 
@@ -433,6 +443,8 @@
 
         document.getElementById('save-to-slot-1').addEventListener('click', () => saveToSlot(0));
         document.getElementById('save-to-slot-2').addEventListener('click', () => saveToSlot(1));
+        document.getElementById('save-to-slot-3').addEventListener('click', () => saveToSlot(2));
+        document.getElementById('save-to-slot-4').addEventListener('click', () => saveToSlot(3));
 
         // Hourly Wage Calculator Logic
         const calcMonthlySalaryInput = document.getElementById('calcMonthlySalary');
@@ -465,5 +477,4 @@
   </script>
 </body>
 </html>
-
 
