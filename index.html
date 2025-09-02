@@ -72,6 +72,29 @@
       </div>
     </section>
 
+    <!-- Hourly Wage Calculator -->
+    <section class="card mb-8">
+        <h2 class="text-xl font-semibold mb-5 border-b pb-3">月給からの時給換算ツール</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <label class="block">
+                <span class="text-sm font-medium text-slate-600">月給（円）</span>
+                <input id="calcMonthlySalary" type="number" inputmode="numeric" class="mt-1 w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="例: 250000">
+            </label>
+            <label class="block">
+                <span class="text-sm font-medium text-slate-600">月の勤務日数</span>
+                <input id="calcDays" type="number" inputmode="numeric" class="mt-1 w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="例: 21">
+            </label>
+            <label class="block">
+                <span class="text-sm font-medium text-slate-600">1日の勤務時間（時）</span>
+                <input id="calcHours" type="number" inputmode="numeric" class="mt-1 w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="例: 8">
+            </label>
+            <div class="text-center bg-indigo-50 p-4 rounded-lg">
+                <span class="text-sm font-medium text-slate-600 block">換算時給</span>
+                <p id="calcResultHourly" class="text-2xl font-bold text-indigo-700 mono">¥0</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Schedule Selector -->
     <section class="card mb-8">
         <h2 class="text-xl font-semibold mb-5 border-b pb-3">週間シフト設定（ライブ計算）</h2>
@@ -410,6 +433,30 @@
 
         document.getElementById('save-to-slot-1').addEventListener('click', () => saveToSlot(0));
         document.getElementById('save-to-slot-2').addEventListener('click', () => saveToSlot(1));
+
+        // Hourly Wage Calculator Logic
+        const calcMonthlySalaryInput = document.getElementById('calcMonthlySalary');
+        const calcDaysInput = document.getElementById('calcDays');
+        const calcHoursInput = document.getElementById('calcHours');
+        const calcResultHourlyEl = document.getElementById('calcResultHourly');
+
+        function calculateHourlyWage() {
+            const monthlySalary = Number(calcMonthlySalaryInput.value) || 0;
+            const days = Number(calcDaysInput.value) || 0;
+            const hours = Number(calcHoursInput.value) || 0;
+
+            if (monthlySalary > 0 && days > 0 && hours > 0) {
+                const totalHours = days * hours;
+                const hourlyWage = monthlySalary / totalHours;
+                calcResultHourlyEl.textContent = yen(hourlyWage);
+            } else {
+                calcResultHourlyEl.textContent = '¥0';
+            }
+        }
+        calcMonthlySalaryInput.addEventListener('input', calculateHourlyWage);
+        calcDaysInput.addEventListener('input', calculateHourlyWage);
+        calcHoursInput.addEventListener('input', calculateHourlyWage);
+
         
         render();
     }
