@@ -23,12 +23,32 @@
   <main class="max-w-5xl mx-auto px-4 py-8 sm:py-12">
     <header class="text-center mb-8">
       <h1 class="text-3xl lg:text-4xl font-bold text-slate-900">給与＆シフト・シミュレーター</h1>
-      <p class="text-slate-600 mt-2">勤務体系を自由に組み合わせて、給与の変化をリアルタイムで確認できます。</p>
+      <p class="text-slate-600 mt-2">勤務体系を自由に組み合わせて、給与の変化をリアルタイムで比較・確認できます。</p>
     </header>
 
+    <!-- Comparison Section -->
+    <section class="card mb-8">
+        <h2 class="text-xl font-semibold mb-5 border-b pb-3">シミュレーション比較</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-center">
+                <thead>
+                    <tr class="border-b-2">
+                        <th class="py-2 px-2 text-left font-semibold">比較項目</th>
+                        <th class="py-2 px-2 font-semibold bg-indigo-50 rounded-t-lg">ライブ計算</th>
+                        <th class="py-2 px-2 font-semibold">比較スロット 1</th>
+                        <th class="py-2 px-2 font-semibold">比較スロット 2</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-table-body">
+                    <!-- Comparison rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+    
     <!-- Controls -->
     <section class="card mb-8">
-      <h2 class="text-xl font-semibold mb-5 border-b pb-3">計算パラメータ</h2>
+      <h2 class="text-xl font-semibold mb-5 border-b pb-3">計算パラメータ（ライブ計算）</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <label class="block">
           <span class="text-sm font-medium text-slate-600">基本時給（円）</span>
@@ -56,7 +76,7 @@
 
     <!-- Schedule Selector -->
     <section class="card mb-8">
-        <h2 class="text-xl font-semibold mb-5 border-b pb-3">週間シフト設定</h2>
+        <h2 class="text-xl font-semibold mb-5 border-b pb-3">週間シフト設定（ライブ計算）</h2>
         <div class="mb-6">
             <h3 class="text-sm font-medium text-slate-600 mb-3">サンプルシフトを読込（水曜・日曜休みベース）</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -81,46 +101,15 @@
         <div id="schedule-selectors" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 border-t pt-5">
             <!-- Day selectors will be injected here by JS -->
         </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-5 mt-5">
+            <button id="save-to-slot-1" class="btn btn-primary">現在の設定をスロット1に保存</button>
+            <button id="save-to-slot-2" class="btn btn-primary">現在の設定をスロット2に保存</button>
+        </div>
     </section>
 
     <!-- Results -->
     <section class="card" id="resultsPanel">
-        <h2 class="text-xl font-semibold mb-5 border-b pb-3">シミュレーション結果</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="result-box">
-                <div class="text-sm text-slate-500">週あたり労働時間</div>
-                <div id="res-weekHours" class="text-2xl font-bold mono text-indigo-600">0.00 h</div>
-            </div>
-            <div class="result-box">
-                <div class="text-sm text-slate-500">週給（概算）</div>
-                <div id="res-weeklyPay" class="text-2xl font-bold mono text-indigo-600">¥0</div>
-            </div>
-            <div class="result-box">
-                <div class="text-sm text-slate-500">月給（概算）</div>
-                <div id="res-monthlyPay" class="text-2xl font-bold mono text-indigo-600">¥0</div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-center">
-            <div class="bg-slate-50 rounded-lg p-2">
-                <div class="text-xs text-slate-500">通常時間</div>
-                <div id="res-regularHours" class="font-semibold mono">0.00 h</div>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-2">
-                <div class="text-xs text-slate-500">夜間時間 (18時以降)</div>
-                <div id="res-eveningHours" class="font-semibold mono">0.00 h</div>
-            </div>
-             <div class="bg-slate-50 rounded-lg p-2">
-                <div class="text-xs text-slate-500">法定時間外</div>
-                <div id="res-overtimeHours" class="font-semibold mono text-red-600">0.00 h</div>
-            </div>
-            <div class="bg-slate-50 rounded-lg p-2">
-                <div class="text-xs text-slate-500">残業代 (概算)</div>
-                <div id="res-overtimePay" class="font-semibold mono text-red-600">¥0</div>
-            </div>
-        </div>
-
+        <h2 class="text-xl font-semibold mb-5 border-b pb-3">シフト詳細（ライブ計算）</h2>
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
@@ -153,29 +142,30 @@
   <script>
     const DAYS = ["月", "火", "水", "木", "金", "土", "日"];
     const yen = (n) => "¥" + Math.round(n).toLocaleString("ja-JP");
-    const hoursFmt = (h) => (Math.round(h * 100) / 100).toFixed(2) + " h";
+    const hoursFmt = (h) => (h == null || isNaN(h)) ? '-' : (Math.round(h * 100) / 100).toFixed(2) + " h";
     
     const SHIFTS = {
       'off': { name: "休日", shifts: [] },
       's1': { name: "出勤① 8:00-17:00", shifts: [{ start:"08:00", end:"17:00", breakMin:60 }] },
       's2': { name: "出勤② 12:30-17:00", shifts: [{ start:"12:30", end:"17:00", breakMin:0 }] },
-      's3': { name: "出勤③ 8:00-22:00", shifts: [{ start:"08:00", end:"22:00", breakMin:90 }] }, // 14h拘束のため休憩1.5hと想定 -> 12.5h
+      's3': { name: "出勤③ 8:00-22:00", shifts: [{ start:"08:00", end:"22:00", breakMin:90 }] },
       's4': { name: "出勤④ 18:00-22:00", shifts: [{ start:"18:00", end:"22:00", breakMin:0 }] },
-      's5': { name: "出勤⑤ 12:30-22:00", shifts: [{ start:"12:30", end:"22:00", breakMin:90 }] }, // 9.5h拘束のため休憩1.5hと想定 -> 8h
+      's5': { name: "出勤⑤ 12:30-22:00", shifts: [{ start:"12:30", end:"22:00", breakMin:90 }] },
     };
     
-    // Sample Patterns (Wednesday & Sunday off base)
-    const PATTERN_A = ['s1',  's1',  'off', 's1',  's1',  's1',  'off']; // 基本: 5 days, 40h
-    const PATTERN_B = ['s1',  's1',  's4',  's1',  's1',  's1',  'off']; // 週5日勤務 + 水曜4h: 6 days, 44h
-    // 月曜の長時間勤務(s3)を、ルールに沿って火曜に移動
-    const PATTERN_C = ['s1',  's3',  'off', 's1',  's1',  's1',  'off']; // 週1長時間 + 週4通常: 5 days, 44.5h
-    const PATTERN_D = ['s1',  's5',  's2',  's1',  's1',  'off', 'off']; // 遅番→時短: 5 days, 36.5h
+    const PATTERN_A = ['s1',  's1',  'off', 's1',  's1',  's1',  'off'];
+    const PATTERN_B = ['s1',  's1',  's4',  's1',  's1',  's1',  'off'];
+    const PATTERN_C = ['s1',  's3',  'off', 's1',  's1',  's1',  'off'];
+    const PATTERN_D = ['s1',  's5',  's2',  's1',  's1',  'off', 'off'];
 
     const state = {
-      hourly: 1500,
-      eveningHourly: 2000,
+      live: {
+        hourly: 1500,
+        eveningHourly: 2000,
+        schedule: [...PATTERN_A],
+      },
+      slots: [null, null],
       weeksPerMonth: 4.33,
-      schedule: [...PATTERN_A], // Default schedule
     };
 
     function parseHHMM(s) {
@@ -186,49 +176,34 @@
     function calculateMinutes(shifts) {
         const eveningStart = parseHHMM("18:00");
         let totalMin = 0, regularMin = 0, eveningMin = 0;
-
         shifts.forEach(sh => {
-            const start = parseHHMM(sh.start);
-            const end = parseHHMM(sh.end);
-            const span = end - start;
+            const start = parseHHMM(sh.start), end = parseHHMM(sh.end), span = end - start;
             if (span <= 0) return;
-
             const netWorkMin = span - (sh.breakMin || 0);
-            
             const eveningSpan = Math.max(0, end - eveningStart);
-            const regularSpan = span - eveningSpan;
-            
-            // 休憩時間を労働時間に比例して按分
             const eveningPortion = (span > 0) ? eveningSpan / span : 0;
             const breakInEvening = (sh.breakMin || 0) * eveningPortion;
-            
             const netEveningMin = Math.max(0, eveningSpan - breakInEvening);
-            const netRegularMin = netWorkMin - netEveningMin;
-            
             totalMin += netWorkMin;
-            regularMin += netRegularMin;
+            regularMin += netWorkMin - netEveningMin;
             eveningMin += netEveningMin;
         });
         return { totalMin, regularMin, eveningMin };
     }
 
-    function calculateMetrics() {
-        const dailyMetrics = state.schedule.map(key => calculateMinutes(SHIFTS[key].shifts));
+    function calculateMetricsFor(config) {
+        const dailyMetrics = config.schedule.map(key => calculateMinutes(SHIFTS[key].shifts));
         const dailyTotalMinutes = dailyMetrics.map(m => m.totalMin);
 
-        let totalOvertimeMin = 0;
-        let weeklyCumulativeMin = 0;
+        let totalOvertimeMin = 0, weeklyCumulativeMin = 0;
         const weeklyLimit = 40 * 60;
-        
         dailyTotalMinutes.forEach(dailyMin => {
             const dailyLimit = 8 * 60;
             const dailyOvertime = Math.max(0, dailyMin - dailyLimit);
-            
             const projectedTotal = weeklyCumulativeMin + dailyMin;
             const weeklyOvertimeSoFar = Math.max(0, weeklyCumulativeMin - weeklyLimit);
             const weeklyOvertimeNow = Math.max(0, projectedTotal - weeklyLimit);
             const weeklyOvertimeForDay = weeklyOvertimeNow - weeklyOvertimeSoFar;
-
             totalOvertimeMin += Math.max(dailyOvertime, weeklyOvertimeForDay);
             weeklyCumulativeMin += dailyMin;
         });
@@ -238,66 +213,70 @@
         const totalWorkMin = totalRegularMin + totalEveningMin;
 
         const overtimeRegularMin = Math.min(totalOvertimeMin, totalRegularMin);
-        const overtimeEveningMin = totalOvertimeMin - overtimeRegularMin;
-
         const baseRegularMin = totalRegularMin - overtimeRegularMin;
-        const baseEveningMin = totalEveningMin - overtimeEveningMin;
+        const baseEveningMin = totalEveningMin - (totalOvertimeMin - overtimeRegularMin);
 
-        const regularPay = (baseRegularMin / 60) * state.hourly;
-        const eveningPay = (baseEveningMin / 60) * state.eveningHourly;
-        const overtimePayVal = (totalOvertimeMin / 60) * state.hourly * 1.25;
+        const regularPay = (baseRegularMin / 60) * config.hourly;
+        const eveningPay = (baseEveningMin / 60) * config.eveningHourly;
+        const overtimePayVal = (totalOvertimeMin / 60) * config.hourly * 1.25;
 
         const weeklyPay = regularPay + eveningPay + overtimePayVal;
         const monthlyPay = weeklyPay * state.weeksPerMonth;
 
         return {
             weekHours: totalWorkMin / 60,
-            regularHours: totalRegularMin / 60,
-            eveningHours: totalEveningMin / 60,
             overtimeHours: totalOvertimeMin / 60,
             weeklyPay,
             monthlyPay,
-            overtimePay: overtimePayVal,
             dailyMinutes: dailyTotalMinutes,
+            hourly: config.hourly,
+            eveningHourly: config.eveningHourly
         };
     }
-
+    
     function render() {
-      // Update state from inputs
-      state.hourly = Number(document.getElementById("hourly").value) || 0;
-      state.eveningHourly = Number(document.getElementById("eveningHourly").value) || 0;
-      // weeksPerMonth is now fixed in the state object
-      state.schedule = DAYS.map((_, i) => document.getElementById(`day-${i}`).value);
+      // Update live state from inputs
+      state.live.hourly = Number(document.getElementById("hourly").value) || 0;
+      state.live.eveningHourly = Number(document.getElementById("eveningHourly").value) || 0;
+      state.live.schedule = DAYS.map((_, i) => document.getElementById(`day-${i}`).value);
 
-      const metrics = calculateMetrics();
-
-      // Render results
-      document.getElementById("res-weekHours").textContent = hoursFmt(metrics.weekHours);
-      document.getElementById("res-weeklyPay").textContent = yen(metrics.weeklyPay);
-      document.getElementById("res-monthlyPay").textContent = yen(metrics.monthlyPay);
-      document.getElementById("res-regularHours").textContent = hoursFmt(metrics.regularHours);
-      document.getElementById("res-eveningHours").textContent = hoursFmt(metrics.eveningHours);
-      document.getElementById("res-overtimeHours").textContent = hoursFmt(metrics.overtimeHours);
-      document.getElementById("res-overtimePay").textContent = yen(metrics.overtimePay);
+      const liveMetrics = calculateMetricsFor(state.live);
+      const slotMetrics = state.slots.map(slot => slot ? calculateMetricsFor(slot) : null);
       
-      // Render schedule details table
+      // Render comparison table
+      const compBody = document.getElementById('comparison-table-body');
+      const metricsToCompare = [
+        { label: "週給", key: "weeklyPay", format: yen },
+        { label: "月給", key: "monthlyPay", format: yen },
+        { label: "週労働時間", key: "weekHours", format: hoursFmt },
+        { label: "時間外", key: "overtimeHours", format: hoursFmt },
+        { label: "基本時給", key: "hourly", format: yen },
+        { label: "夜間時給", key: "eveningHourly", format: yen },
+      ];
+      compBody.innerHTML = metricsToCompare.map(metric => `
+        <tr class="border-b last:border-0">
+            <td class="py-2.5 px-2 text-left font-medium">${metric.label}</td>
+            <td class="py-2.5 px-2 mono font-semibold text-indigo-700 bg-indigo-50">${metric.format(liveMetrics[metric.key])}</td>
+            ${slotMetrics.map(sm => `<td class="py-2.5 px-2 mono">${sm ? metric.format(sm[metric.key]) : '-'}</td>`).join('')}
+        </tr>
+      `).join('');
+
+      // Render live schedule details
       const scheduleDetails = document.getElementById("schedule-details");
       scheduleDetails.innerHTML = "";
       DAYS.forEach((day, i) => {
-        const shiftKey = state.schedule[i];
-        const shiftInfo = SHIFTS[shiftKey];
-        const dailyStr = shiftInfo.name;
-        
-        const tr = document.createElement('tr');
+        const shiftKey = state.live.schedule[i];
+        const dailyStr = SHIFTS[shiftKey].name;
+        tr = document.createElement('tr');
         tr.className = "border-b last:border-0";
         tr.innerHTML = `
           <td class="py-2.5 pr-3 font-medium">${day}</td>
           <td class="py-2.5 pr-3 ${shiftKey === 'off' ? 'text-slate-400' : ''}">${dailyStr}</td>
-          <td class="py-2.5 pr-3 text-right mono">${hoursFmt(metrics.dailyMinutes[i]/60)}</td>
+          <td class="py-2.5 pr-3 text-right mono">${hoursFmt(liveMetrics.dailyMinutes[i]/60)}</td>
         `;
         scheduleDetails.appendChild(tr);
       });
-      document.getElementById("total-hours-footer").textContent = hoursFmt(metrics.weekHours);
+      document.getElementById("total-hours-footer").textContent = hoursFmt(liveMetrics.weekHours);
     }
     
     function loadPattern(pattern) {
@@ -309,25 +288,24 @@
         });
         render();
     }
+    
+    function saveToSlot(slotIndex) {
+        state.slots[slotIndex] = JSON.parse(JSON.stringify(state.live)); // Deep copy
+        render();
+    }
 
     function setup() {
         const scheduleSelectors = document.getElementById('schedule-selectors');
         DAYS.forEach((day, i) => {
             const div = document.createElement('div');
-            // 夜間シフト('s3','s4','s5')は火・水・木（index 1,2,3）のみ選択可能にする
-            const isNightShiftAllowed = [1, 2, 3].includes(i); 
-
+            const isNightShiftAllowed = [1, 2, 3].includes(i); // Tue, Wed, Thu
             div.innerHTML = `
                 <label for="day-${i}" class="block text-sm font-medium text-slate-700">${day}曜日</label>
                 <select id="day-${i}" class="mt-1 w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    ${Object.keys(SHIFTS).filter(key => {
-                        // keyが夜間シフト（s3,s4,s5）で、かつ許可されていない曜日（isNightShiftAllowedがfalse）の場合、選択肢から除外する
-                        if (['s3', 's4', 's5'].includes(key) && !isNightShiftAllowed) {
-                            return false;
-                        }
-                        return true;
-                    }).map(key => `
-                        <option value="${key}" ${state.schedule[i] === key ? 'selected' : ''}>${SHIFTS[key].name.split(' ')[0]}</option>
+                    ${Object.keys(SHIFTS).filter(key => 
+                        !(['s3', 's4', 's5'].includes(key) && !isNightShiftAllowed)
+                    ).map(key => `
+                        <option value="${key}" ${state.live.schedule[i] === key ? 'selected' : ''}>${SHIFTS[key].name.split(' ')[0]}</option>
                     `).join('')}
                 </select>
             `;
@@ -337,15 +315,17 @@
         // Event Listeners
         document.getElementById("hourly").addEventListener("input", render);
         document.getElementById("eveningHourly").addEventListener("input", render);
-        // Removed event listener for weeksPerMonth
         scheduleSelectors.addEventListener("change", render);
         
         document.getElementById('presetA').addEventListener('click', () => loadPattern(PATTERN_A));
         document.getElementById('presetB').addEventListener('click', () => loadPattern(PATTERN_B));
         document.getElementById('presetC').addEventListener('click', () => loadPattern(PATTERN_C));
         document.getElementById('presetD').addEventListener('click', () => loadPattern(PATTERN_D));
+
+        document.getElementById('save-to-slot-1').addEventListener('click', () => saveToSlot(0));
+        document.getElementById('save-to-slot-2').addEventListener('click', () => saveToSlot(1));
         
-        render(); // Initial render
+        render();
     }
 
     document.addEventListener('DOMContentLoaded', setup);
